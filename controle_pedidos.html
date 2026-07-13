@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Controle de Pedidos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFAF7;
+    --ink:#1B2430;
+    --ink-soft:#5C6672;
+    --line:#DDE2E6;
+    --line-strong:#C3CAD1;
+    --amber:#B9791C;
+    --amber-bg:#FBF0DC;
+    --green:#2F7A4D;
+    --green-bg:#E4F1E8;
+    --slate:#5B7A99;
+    --slate-bg:#EAF0F5;
+    --red:#B23B3B;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    font-size:26px;
+    margin:0;
+  }
+  .subtitle{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  .summary{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+  .summary b{color:var(--ink);font-size:14px;}
+
+  .add-bar{
+    display:flex;
+    gap:10px;
+    margin-bottom:24px;
+  }
+  .add-bar input{
+    flex:1;
+    padding:12px 14px;
+    border:1.5px solid var(--line-strong);
+    border-radius:4px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    background:var(--card);
+    color:var(--ink);
+  }
+  .add-bar input:focus{outline:none;border-color:var(--ink);}
+  .add-bar button{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    font-size:13px;
+    font-weight:600;
+    padding:0 22px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    transition:opacity .15s;
+  }
+  .add-bar button:hover{opacity:0.85;}
+
+  .card{
+    background:var(--card);
+    border:1.5px solid var(--line);
+    border-radius:6px;
+    margin-bottom:14px;
+    overflow:hidden;
+    transition:border-color .15s;
+  }
+  .card.complete{border-color:var(--green);}
+  .card-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px 10px;
+    gap:12px;
+  }
+  .name-field{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex:1;
+    min-width:0;
+  }
+  .tag-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    flex-shrink:0;
+  }
+  .name-field input{
+    border:none;
+    background:transparent;
+    font-family:'Oswald',sans-serif;
+    font-size:17px;
+    font-weight:500;
+    color:var(--ink);
+    width:100%;
+    padding:2px 0;
+    border-bottom:1.5px dashed transparent;
+  }
+  .name-field input:focus{outline:none;border-bottom-color:var(--line-strong);}
+  .name-field input::placeholder{color:#B7BEC5;font-style:italic;font-weight:400;font-family:'Inter',sans-serif;}
+  .del-btn{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:18px;
+    line-height:1;
+    padding:4px 6px;
+    flex-shrink:0;
+  }
+  .del-btn:hover{color:var(--red);}
+
+  .meta-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:0 16px 12px 40px;
+  }
+  .meta-row label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--ink-soft);
+  }
+  .meta-row input[type="date"]{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink);
+    border:1px solid var(--line-strong);
+    border-radius:3px;
+    padding:3px 6px;
+    background:var(--card);
+  }
+  .meta-row input[type="date"]:focus{outline:none;border-color:var(--ink);}
+
+  .stages{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--line);
+  }
+  .stage{
+    padding:12px 14px;
+    border-right:1px solid var(--line);
+  }
+  .stage:last-child{border-right:none;}
+  .stage-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.8px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .stamp{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    padding:6px 10px;
+    border-radius:3px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    width:100%;
+    justify-content:center;
+    transition:all .12s;
+    user-select:none;
+  }
+  .stamp.done{
+    background:var(--green-bg);
+    color:var(--green);
+    border-color:var(--green);
+  }
+  .stamp.pending{
+    background:var(--amber-bg);
+    color:var(--amber);
+    border-color:var(--amber);
+    border-style:dashed;
+  }
+  .stamp.waiting{
+    background:var(--slate-bg);
+    color:var(--slate);
+    border-color:var(--slate);
+    border-style:dashed;
+  }
+  .stamp:hover{filter:brightness(0.96);}
+  .stamp:active{transform:scale(0.97);}
+
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    border:1.5px dashed var(--line-strong);
+    border-radius:6px;
+  }
+
+  @media (max-width:640px){
+    .stages{grid-template-columns:repeat(2,1fr);}
+    .stage:nth-child(2){border-right:none;}
+    .stage:nth-child(3),.stage:nth-child(4){border-top:1px solid var(--line);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Controle de Pedidos</h1>
+      <div class="subtitle">NFe · Boleto · Estoque · Entrega</div>
+    </div>
+    <div class="summary" id="summary"></div>
+  </header>
+
+  <div class="add-bar">
+    <input type="text" id="newOrderInput" placeholder="Nome do novo pedido..." />
+    <button id="addBtn">Adicionar</button>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'pedidos-lista';
+let pedidos = [];
+let loaded = false;
+
+function hojeISO(){
+  const d = new Date();
+  const tz = d.getTimezoneOffset() * 60000;
+  return new Date(d - tz).toISOString().slice(0,10);
+}
+
+function novoPedido(nome){
+  return {
+    id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    nome: nome || '',
+    data: hojeISO(),
+    nfe: false,
+    boleto: false,
+    estoque: 'aguardando', // 'aguardando' | 'separado'
+    entrega: false
+  };
+}
+
+async function carregar(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, true);
+    if(res && res.value){
+      pedidos = JSON.parse(res.value);
+      pedidos.forEach(p => { if(!p.data) p.data = ''; });
+    }
+  }catch(e){
+    pedidos = [];
+  }
+  loaded = true;
+  render();
+}
+
+async function salvar(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(pedidos), true);
+  }catch(e){
+    console.error('Falha ao salvar', e);
+  }
+}
+
+function statusPedidoCompleto(p){
+  return !!p.nome.trim() && p.nfe && p.boleto && p.estoque === 'separado' && p.entrega;
+}
+
+function render(){
+  const list = document.getElementById('list');
+  const summary = document.getElementById('summary');
+
+  if(!loaded){
+    list.innerHTML = '<div class="empty">Carregando pedidos...</div>';
+    return;
+  }
+
+  if(pedidos.length === 0){
+    list.innerHTML = '<div class="empty">Nenhum pedido cadastrado ainda.<br>Adicione o primeiro pedido acima.</div>';
+    summary.innerHTML = '';
+    return;
+  }
+
+  const totalCompletos = pedidos.filter(statusPedidoCompleto).length;
+  summary.innerHTML = `<b>${totalCompletos}/${pedidos.length}</b> pedidos concluídos`;
+
+  list.innerHTML = pedidos.map((p, idx) => {
+    const completo = statusPedidoCompleto(p);
+    const nomeVazio = !p.nome.trim();
+    return `
+      <div class="card ${completo ? 'complete' : ''}">
+        <div class="card-top">
+          <div class="name-field">
+            <span class="tag-num">#${String(idx+1).padStart(3,'0')}${p.data ? ' · ' + formatarData(p.data) : ''}</span>
+            <input type="text" value="${escapeAttr(p.nome)}" placeholder="Nome do pedido (obrigatório)" data-id="${p.id}" data-field="nome" />
+          </div>
+          <button class="del-btn" data-id="${p.id}" data-action="delete" title="Remover pedido">✕</button>
+        </div>
+        <div class="meta-row">
+          <label for="date-${p.id}">Data:</label>
+          <input type="date" id="date-${p.id}" value="${p.data || ''}" data-id="${p.id}" data-field="data" />
+        </div>
+        <div class="stages">
+          <div class="stage">
+            <div class="stage-label">NFe</div>
+            <div class="stamp ${(!nomeVazio && p.nfe) ? 'done' : 'pending'}" data-id="${p.id}" data-field="nfe">
+              ${(!nomeVazio && p.nfe) ? '✓ Feito' : '○ Não feito'}
+            </div>
+          </div>
+          <div class="stage">
+            <div class="stage-label">Boleto</div>
+            <div class="stamp ${(!nomeVazio && p.boleto) ? 'done' : 'pending'}" data-id="${p.id}" data-field="boleto">
+              ${(!nomeVazio && p.boleto) ? '✓ Feito' : '○ Não feito'}
+            </div>
+          </div>
+          <div class="stage">
+            <div class="stage-label">Estoque</div>
+            <div class="stamp ${p.estoque === 'separado' ? 'done' : 'waiting'}" data-id="${p.id}" data-field="estoque">
+              ${p.estoque === 'separado' ? '✓ Separado' : '◌ Aguardando'}
+            </div>
+          </div>
+          <div class="stage">
+            <div class="stage-label">Entrega</div>
+            <div class="stamp ${(!nomeVazio && p.entrega) ? 'done' : 'pending'}" data-id="${p.id}" data-field="entrega">
+              ${(!nomeVazio && p.entrega) ? '✓ Feito' : '○ Não feito'}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // bind name inputs
+  list.querySelectorAll('input[data-field="nome"]').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const id = e.target.dataset.id;
+      const p = pedidos.find(x => x.id === id);
+      if(p){
+        p.nome = e.target.value;
+        salvar();
+        // re-render just the badges/summary without losing focus is complex;
+        // instead we debounce a light refresh of stamps only
+        refreshStampsOnly();
+      }
+    });
+  });
+
+  // bind date
+  list.querySelectorAll('input[data-field="data"]').forEach(inp => {
+    inp.addEventListener('change', (e) => {
+      const id = e.target.dataset.id;
+      const p = pedidos.find(x => x.id === id);
+      if(p){
+        p.data = e.target.value;
+        salvar();
+      }
+    });
+  });
+
+  // bind delete
+  list.querySelectorAll('[data-action="delete"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      pedidos = pedidos.filter(x => x.id !== id);
+      salvar();
+      render();
+    });
+  });
+
+  // bind stamps
+  list.querySelectorAll('.stamp').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const id = e.currentTarget.dataset.id;
+      const field = e.currentTarget.dataset.field;
+      const p = pedidos.find(x => x.id === id);
+      if(!p) return;
+      if(field === 'estoque'){
+        p.estoque = p.estoque === 'separado' ? 'aguardando' : 'separado';
+      }else{
+        p[field] = !p[field];
+      }
+      salvar();
+      render();
+    });
+  });
+}
+
+// Lightweight refresh to update completion styling/summary while typing name,
+// without rebuilding inputs (would lose cursor focus)
+function refreshStampsOnly(){
+  const summary = document.getElementById('summary');
+  const totalCompletos = pedidos.filter(statusPedidoCompleto).length;
+  summary.innerHTML = `<b>${totalCompletos}/${pedidos.length}</b> pedidos concluídos`;
+
+  pedidos.forEach(p => {
+    const card = [...document.querySelectorAll('.card')].find(c =>
+      c.querySelector(`input[data-id="${p.id}"]`)
+    );
+    if(!card) return;
+    card.classList.toggle('complete', statusPedidoCompleto(p));
+    const nomeVazio = !p.nome.trim();
+
+    const nfeEl = card.querySelector(`[data-field="nfe"]`);
+    nfeEl.className = 'stamp ' + ((!nomeVazio && p.nfe) ? 'done' : 'pending');
+    nfeEl.textContent = (!nomeVazio && p.nfe) ? '✓ Feito' : '○ Não feito';
+
+    const boletoEl = card.querySelector(`[data-field="boleto"]`);
+    boletoEl.className = 'stamp ' + ((!nomeVazio && p.boleto) ? 'done' : 'pending');
+    boletoEl.textContent = (!nomeVazio && p.boleto) ? '✓ Feito' : '○ Não feito';
+
+    const entregaEl = card.querySelector(`[data-field="entrega"]`);
+    entregaEl.className = 'stamp ' + ((!nomeVazio && p.entrega) ? 'done' : 'pending');
+    entregaEl.textContent = (!nomeVazio && p.entrega) ? '✓ Feito' : '○ Não feito';
+  });
+}
+
+function formatarData(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function escapeAttr(str){
+  return String(str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  const input = document.getElementById('newOrderInput');
+  const nome = input.value.trim();
+  pedidos.push(novoPedido(nome));
+  input.value = '';
+  salvar();
+  render();
+});
+
+document.getElementById('newOrderInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    document.getElementById('addBtn').click();
+  }
+});
+
+carregar();
+</script>
+</body>
+</html>
